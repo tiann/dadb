@@ -86,7 +86,7 @@ internal class AdbWriter(sink: Sink) : AutoCloseable {
                         writeIntLe(0)
                     } else {
                         writeIntLe(length)
-                        writeIntLe(payloadChecksum(payload))
+                        writeIntLe(payloadChecksum(payload, offset, length))
                     }
                     writeIntLe(command xor -0x1)
                     if (payload != null) {
@@ -110,10 +110,10 @@ internal class AdbWriter(sink: Sink) : AutoCloseable {
 
     companion object {
 
-        private fun payloadChecksum(payload: ByteArray): Int {
+        private fun payloadChecksum(payload: ByteArray, offset: Int, length: Int): Int {
             var checksum = 0
-            for (byte in payload) {
-                checksum += byte.toUByte().toInt()
+            for (index in offset until offset + length) {
+                checksum += payload[index].toUByte().toInt()
             }
             return checksum
         }

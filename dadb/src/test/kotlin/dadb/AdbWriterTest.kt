@@ -37,6 +37,23 @@ internal class AdbWriterTest {
     }
 
     @Test
+    fun payloadChecksum_coversOnlyWrittenRange() {
+        val output = Buffer()
+        val writer = AdbWriter(output)
+        val payload = byteArrayOf(10, 20, 30, 40, 50)
+
+        writer.writeWrite(localId = 1, remoteId = 2, payload = payload, offset = 1, length = 2)
+
+        assertThat(output.readIntLe()).isEqualTo(Constants.CMD_WRTE)
+        assertThat(output.readIntLe()).isEqualTo(1)
+        assertThat(output.readIntLe()).isEqualTo(2)
+        assertThat(output.readIntLe()).isEqualTo(2)
+        assertThat(output.readIntLe()).isEqualTo(20 + 30)
+        assertThat(output.readIntLe()).isEqualTo(Constants.CMD_WRTE xor -0x1)
+        assertThat(output.readByteArray()).isEqualTo(byteArrayOf(20, 30))
+    }
+
+    @Test
     fun payloadWrite_onWriteTimeout_surfacesAsAdbTimeout() {
         // The wedged-push path: AdbStream.sink.flush() -> writeWrite(...). okio's write timeout on a
         // stalled adbd is a timeout, not a dropped connection, so it surfaces as AdbTimeoutException.
