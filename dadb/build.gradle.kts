@@ -28,5 +28,7 @@ tasks.test {
 
 mavenPublishing {
     publishToMavenCentral(true)
-    signAllPublications()
+    if (System.getenv("JITPACK") != "true") {
+        signAllPublications()
+    }
 }

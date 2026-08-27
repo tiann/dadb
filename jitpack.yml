@@ -1,0 +1,4 @@
+jdk:
+  - openjdk17
+install:
+  - ./gradlew clean -PGROUP=com.github.tiann -PVERSION_NAME=$VERSION -x test publishToMavenLocal
